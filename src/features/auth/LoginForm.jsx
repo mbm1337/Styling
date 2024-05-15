@@ -1,43 +1,56 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink,useNavigate } from 'react-router-dom';
+
+
 
 
 const LoginForm = ({isAuthenticated,setAuthenticated}) => {
+    const navigate = useNavigate();
+
     const handleSubmit = async (e) => {
+
         e.preventDefault();
-        const form = e.target;
-        const data = new FormData(form);
-        const uname = data.get('uname');
-        const pass = data.get('pass');
-        if (uname === 'admin' && pass === 'admin') {
+        const [email, pass] = e.target
+        const response = await fetch('http://localhost:7000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                uname: email.value,
+                pass: pass.value
+            })
+        });
+        if (response.ok) {
+            const data = await response.json();
             setAuthenticated(true);
+            console.log(data);
         } else {
-            alert('Invalid username or password');
+            console.error('Error:', response.status);
         }
+
+
 
     };
 
     useState(() => {
-        if (isAuthenticated) naviegate('/home',{replace:true});
+        if (isAuthenticated) navigate ('/home'), { replace: true };
         
-    }, [isAuthenticated]);
+    }, [isAuthenticated, navigate]);
 
 
     return (
         <div>
             <form onSubmit={handleSubmit}>
-                <div className="input-container">
-                    <label>Username </label>
-                    <input type="text" name="uname" required />
-                    
+                <div>
+                    <label htmlFor="email">Email:</label>
+                    <input type="text" id="email" name="email" />
                 </div>
-                <div className="input-container">
-                    <label>Password </label>
-                    <input type="password" name="pass" required />
+                <div>
+                    <label htmlFor="pass">Password:</label>
+                    <input type="password" id="pass" name="pass" />
                 </div>
-                <div className="button-container">
-                    <input type="submit" value="Login" />
-                </div>
+                <button type="submit">Login</button>
             </form>
 
         </div>
